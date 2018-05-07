@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00c853</color>
+    <color name="colorPrimaryDark">#009624</color>
+    <color name="colorPrimaryLight">#5efc82</color>
+
+    <color name="colorSecondary">#795548</color>
+    <color name="colorSecondaryDark">#4b2c20</color>
+    <color name="colorSecondaryLight">#a98274</color>
+
+    <color name="posterTextColor">#000000</color>
+</resources>

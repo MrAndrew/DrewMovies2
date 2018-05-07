@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">DrewMovies</string>
+
+    <!-- Movie detail view strings -->
+    <string name="movie_title_label">Title:</string>
+    <string name="movie_plot_label">About:</string>
+    <string name="user_rating_label">Average User Rating:</string>
+    <string name="release_date_label">Release Date:</string>
+    <string name="video_list_label">Videos:</string>
+    <string name="movie_reviews_btn">Reviews</string>
+    <string name="empty_reviews">No Reviews Available</string>
+
+    <!-- Movie reviews view strings -->
+    <string name="reviews_label">Reviews:</string>
+
+    <!--preferences and settings strings-->
+    <string name="pref_sort_key">sort order</string>
+    <string name="pref_sort_label">View</string>
+    <string name="pref_popular_label">Popular Movies</string>
+    <string name="pref_top_rated_label">Top Rated Movies</string>
+    <string name="pref_favorites_label">Favorite Movies</string>
+    <string name="settings">Settings</string>
+    <string name="pref_popular_value">popularity</string>
+    <string name="pref_top_rated_value">top rated</string>
+    <string name="pref_favorites_value">favorites</string>
+
+    <!--error strings-->
+    <string name="network_error">There was a problem loading files. Check your internet connection
+    and try again.</string>
+
+    <!--Accessibility stuff-->
+    <string name="movie_iv_content_description">An image of the movie </string>
+
+    <!--Activity titles-->
+    <string name="movie_list_pop_title">Popular Movies</string>
+    <string name="movie_list_top_title">Top Rated Movies</string>
+    <string name="movie_list_fav_title">Favorite Movies</string>
+    <string name="movie_detail_title">Movie Details</string>
+    <string name="movie_reviews_title">Reviews</string>
+
+</resources>
