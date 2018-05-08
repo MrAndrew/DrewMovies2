@@ -24,7 +24,7 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
     final private ListItemClickListener mOnClickListener;
 
     public interface ListItemClickListener {
-        void onListItemClick(String videoKey);
+        void onListItemClick(View v, String videoKey);
     }
 
     public VideoListAdapter(ArrayList<VideoParcelable> inVideos, ListItemClickListener listener) {
@@ -59,10 +59,12 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
         final View videoView;
         final Button playBtn;
         final TextView videoTitle;
+        final Button shareBtn;
 
         VideoViewHolder(View v) {
             super(v);
 
+            shareBtn = v.findViewById(R.id.video_share_btn);
             videoView = v.findViewById(R.id.video_item_ll);
             playBtn = v.findViewById(R.id.video_link_btn);
             videoTitle = v.findViewById(R.id.video_title);
@@ -70,8 +72,11 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
 
         void bind(final int index) {
             //set title and link values here
-            videoView.setTag(videos.get(index).getVideoKey());
-            videoView.setOnClickListener(this);
+//            videoView.setTag(videos.get(index).getVideoKey());
+//            videoView.setOnClickListener(this);
+
+            shareBtn.setTag(videos.get(index).getVideoKey());
+            shareBtn.setOnClickListener(this);
 
             //TODO //CREATE SHARE INTENT TO SHARE YOUTUBE VIDEO LINK
             //TODO //ADD THE LINK BUTTON IN video_link_item.xml and remove view listener so
@@ -86,7 +91,8 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
         @Override
         public void onClick(View v) {
             String videoKey = (String) v.getTag();
-            mOnClickListener.onListItemClick(videoKey);
+//            Log.v(TAG, "view clicked: " + v);
+            mOnClickListener.onListItemClick(v, videoKey);
         }
 
     }

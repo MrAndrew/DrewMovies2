@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,7 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
     RecyclerView mVideoListRv;
     @BindView(R.id.favorite_button)
     CheckBox mFavBtn;
+    private ShareActionProvider mShareActionProvider;
 
 //    private final String TAG = MovieDetailActivity.class.getSimpleName();
 
@@ -153,18 +155,31 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    public void onListItemClick(String videoKey) {
-
-        //used answer from StackOverflow at: "https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent"
-        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoKey));
-        Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("http://www.youtube.com/watch?v=" + videoKey));
-        try {
-            this.startActivity(appIntent);
-        } catch (ActivityNotFoundException ex) {
-            this.startActivity(webIntent);
+    public void onListItemClick(View v, String videoKey) {
+        //TODO CHECK IF IT WAS SHARE BTN OR PLAY BUTTON AND START CORRECT INTENT ACCORDINGLY
+        if(v == findViewById(R.id.video_link_btn)) {
+            //used answer from StackOverflow at: "https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent"
+            Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoKey));
+            Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + videoKey));
+            try {
+                this.startActivity(appIntent);
+            } catch (ActivityNotFoundException ex) {
+                this.startActivity(webIntent);
+            }
+        } else if(v == findViewById(R.id.video_share_btn)) {
+//            Toast.makeText(MovieDetailActivity.this, "Clicked Share button.",
+//                    Toast.LENGTH_SHORT).show();
+            //found solution here: "https://developer.android.com/training/sharing/send"
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            Uri videoLink = Uri.parse("http://www.youtube.com/watch?v=" + videoKey);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, videoLink.toString());
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
         }
     }
+
 
     public void startReviewsActivity(View view) {
         Intent startReviewsIntent = new Intent(MovieDetailActivity.this, MovieReviewsActivity.class);
