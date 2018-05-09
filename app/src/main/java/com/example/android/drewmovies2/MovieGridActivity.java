@@ -237,6 +237,7 @@ public class MovieGridActivity extends AppCompatActivity implements
     protected void onPostResume() {
         super.onPostResume();
         //makes removal of a favorite item appear as soon as the user returns from the detail view
+        //but costs the user some performance as loading movie objects from the db takes some time :(
         if(this.getTitle() == getResources().getText(R.string.movie_list_fav_title)) {
             URL movieListUrl = null;
             boolean favoriteSelection = true;
