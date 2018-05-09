@@ -18,7 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,7 +52,6 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
     RecyclerView mVideoListRv;
     @BindView(R.id.favorite_button)
     CheckBox mFavBtn;
-    private ShareActionProvider mShareActionProvider;
 
 //    private final String TAG = MovieDetailActivity.class.getSimpleName();
 
@@ -155,9 +153,9 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    public void onListItemClick(View v, String videoKey) {
-        //TODO CHECK IF IT WAS SHARE BTN OR PLAY BUTTON AND START CORRECT INTENT ACCORDINGLY
-        if(v == findViewById(R.id.video_link_btn)) {
+    public void onListItemClick(Integer v, String videoKey) {
+        //use integers because passing in a view only works for the first item in the list
+        if(v == 1) {
             //used answer from StackOverflow at: "https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent"
             Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoKey));
             Intent webIntent = new Intent(Intent.ACTION_VIEW,
@@ -167,7 +165,7 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
             } catch (ActivityNotFoundException ex) {
                 this.startActivity(webIntent);
             }
-        } else if(v == findViewById(R.id.video_share_btn)) {
+        } else if(v == 2) {
 //            Toast.makeText(MovieDetailActivity.this, "Clicked Share button.",
 //                    Toast.LENGTH_SHORT).show();
             //found solution here: "https://developer.android.com/training/sharing/send"

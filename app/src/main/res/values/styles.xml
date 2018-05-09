@@ -14,4 +14,21 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- styles for FAB -->
+    <style name="FloatingActionButton" parent="android:Widget.Material.Button">
+        <item name="android:background">@drawable/fab_background</item>
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+    </style>
+    <style name="FabButtonText" parent="android:TextAppearance">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="FloatingActionButton_text" parent="android:Widget.Material.Button">
+        <item name="android:background">@android:drawable/alert_dark_frame</item>
+        <item name="android:colorBackground">@color/colorSecondary</item>
+        <item name="android:radius">5dp</item>
+        <item name="android:layout_marginEnd">-42dp</item>
+        <item name="android:textAppearance">@style/FabButtonText</item>
+    </style>
+
 </resources>

@@ -1,23 +1,22 @@
 package com.example.android.drewmovies2;
 
 import android.annotation.SuppressLint;
+import android.support.design.widget.FloatingActionButton;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.drewmovies2.data.FavoriteMoviesContract;
@@ -33,11 +32,30 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieGridActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MovieGridActivity extends AppCompatActivity implements
+//        SharedPreferences.OnSharedPreferenceChangeListener
+    View.OnClickListener {
 
 //    final static private String TAG = MovieGridActivity.class.getSimpleName();
     @BindView(R.id.movie_posters_gv)
     GridView moviesGridView;
+    @BindView(R.id.fab_prime)
+    FloatingActionButton fabPrime;
+    @BindView(R.id.fab_pop)
+    FloatingActionButton fabPop;
+    @BindView(R.id.fab_top)
+    FloatingActionButton fabTop;
+    @BindView(R.id.fab_fav)
+    FloatingActionButton fabFav;
+    @BindView(R.id.fab_pop_tv)
+    TextView fabPopTv;
+    @BindView(R.id.fab_top_tv)
+    TextView fabTopTv;
+    @BindView(R.id.fab_fav_tv)
+    TextView fabFavTv;
+
+    private Boolean isFabOpen = false;
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
 
 
     @Override
@@ -46,106 +64,93 @@ public class MovieGridActivity extends AppCompatActivity implements SharedPrefer
         setContentView(R.layout.activity_movie_grid);
         ButterKnife.bind(this);
 
-        //shared preference methods will handle calling the async task to load movie data
-        setupSharedPreferences();
+//        //set animation resources
+        fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fab_close);
+        rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_forward);
+        rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
+        //set click listeners
+        fabPrime.setOnClickListener(this);
+        fabPop.setOnClickListener(this);
+        fabTop.setOnClickListener(this);
+        fabFav.setOnClickListener(this);
     }
 
+    //I found a tutorial and used in a previous practice project before starting this course and I
+    //couldn't find the link again for this project submission, but I think this functions better for
+    //the user than multiple clicks to a shared preference screen and I've significantly changed the
+    //implementation to be far from the original source
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    //returns URL because it's only used to change search atm
-    private void setupSharedPreferences() {
-        URL returnUrl;
+    public void onClick(View v) {
+        int id = v.getId();
+        URL movieListUrl;
         boolean favoriteSelection;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String sortPref = sharedPreferences.getString(getString(R.string.pref_sort_key), getString(R.string.pref_popular_value));
-//        Log.v(TAG, "sortPref: " + sortPref);
-        if(sortPref.equals(getString(R.string.pref_popular_value))) {
-            //set activity title to show user
-            setTitle(getResources().getText(R.string.movie_list_pop_title));
-            returnUrl = BuildUrlUtils.buildMovieListPopRequestUrl();
-            favoriteSelection = false;
-//            Log.v(TAG, "returnURLpop: " + returnUrl);Log.v(TAG, "returnURL: " + returnUrl);
-        } else if (sortPref.equals(getString(R.string.pref_top_rated_value))) {
-            //set activity title to show user
-            setTitle(getResources().getText(R.string.movie_list_top_title));
-            returnUrl = BuildUrlUtils.buildMovieListRatedRequestUrl();
-            favoriteSelection = false;
-//            Log.v(TAG, "returnURLrated: " + returnUrl);Log.v(TAG, "returnURL: " + returnUrl);
-        } else if (sortPref.equals(getString(R.string.pref_favorites_value))) {
-            //set activity title to show user
-            setTitle(getResources().getText(R.string.movie_list_fav_title));
-            returnUrl = null;
-            favoriteSelection = true;
-//            Log.v(TAG, "Favorites view option selected");
-        } else {
-            returnUrl = null;
-            favoriteSelection = false;
-//            Log.v(TAG, "none of the sort preferences checked in if-else");
-        }
-//        Log.v(TAG, "returnURL: " + returnUrl);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        URL movieListUrl = returnUrl;
-
-        loadVideoList(movieListUrl, favoriteSelection);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.user_pref_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.movie_display_settings) {
-            Intent startSettingsActivity = new Intent(this, UserSettingsActivity.class);
-            startActivity(startSettingsActivity);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_sort_key))) {
-            URL returnUrl;
-            boolean favoriteSelection;
-            String sortPref = sharedPreferences.getString(getString(R.string.pref_sort_key), getString(R.string.pref_popular_value));
-//            Log.v(TAG, "sortPref: " + sortPref);
-            if(sortPref.equals(getString(R.string.pref_popular_value))) {
-                returnUrl = BuildUrlUtils.buildMovieListPopRequestUrl();
+        switch (id){
+            case R.id.fab_prime:
+                //closes or opens fab once user selects plus icon
+                animateFAB();
+                break;
+            case R.id.fab_pop:
+                // sets view to and loads popular movies
+                setTitle(getResources().getText(R.string.movie_list_pop_title));
+                movieListUrl = BuildUrlUtils.buildMovieListPopRequestUrl();
                 favoriteSelection = false;
-//                Log.v(TAG, "returnURLpop: " + returnUrl);Log.v(TAG, "returnURL: " + returnUrl);
-            } else if (sortPref.equals(getString(R.string.pref_top_rated_value))) {
-                returnUrl = BuildUrlUtils.buildMovieListRatedRequestUrl();
+                loadVideoList(movieListUrl, favoriteSelection);
+                //closes fab once user selects an option
+                animateFAB();
+                break;
+            case R.id.fab_top:
+                // sets view to and loads top rated movies
+                setTitle(getResources().getText(R.string.movie_list_top_title));
+                movieListUrl = BuildUrlUtils.buildMovieListRatedRequestUrl();
                 favoriteSelection = false;
-//                Log.v(TAG, "returnURLrated: " + returnUrl);Log.v(TAG, "returnURL: " + returnUrl);
-            } else if (sortPref.equals(getString(R.string.pref_favorites_value))) {
-                returnUrl = null;
+                loadVideoList(movieListUrl, favoriteSelection);
+                //closes fab once user selects an option
+                animateFAB();
+                break;
+            case R.id.fab_fav:
+                // sets view to and loads user's favorite movies
+                setTitle(getResources().getText(R.string.movie_list_fav_title));
+                movieListUrl = null;
                 favoriteSelection = true;
-//                Log.v(TAG, "Favorites view option selected");
-            } else {
-                returnUrl = null;
-                favoriteSelection = false;
-//                Log.v(TAG, "none of the sort preferences checked in if-else");
-            }
-
-//            Log.v(TAG, "returnURL: " + returnUrl);
-            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-            URL movieListUrl = returnUrl;
-
-            loadVideoList(movieListUrl, favoriteSelection);
-
+                loadVideoList(movieListUrl, favoriteSelection);
+                //closes fab once user selects an option
+                animateFAB();
+                break;
         }
-    } //end onSharedPreferenceChanged
+    }
 
+    public void animateFAB(){
+    //animates opening/showing of fab button choices
+        if(isFabOpen){
+            fabPrime.startAnimation(rotate_backward);
+            fabPop.startAnimation(fab_close);
+            fabTop.startAnimation(fab_close);
+            fabFav.startAnimation(fab_close);
+            fabPopTv.startAnimation(fab_close);
+            fabTopTv.startAnimation(fab_close);
+            fabFavTv.startAnimation(fab_close);
+            fabPop.setClickable(false);
+            fabTop.setClickable(false);
+            fabFav.setClickable(false);
+            isFabOpen = false;
+
+        } else {
+            fabPrime.startAnimation(rotate_forward);
+            fabPop.startAnimation(fab_open);
+            fabTop.startAnimation(fab_open);
+            fabFav.startAnimation(fab_open);
+            fabPopTv.startAnimation(fab_open);
+            fabTopTv.startAnimation(fab_open);
+            fabFavTv.startAnimation(fab_open);
+            fabPop.setClickable(true);
+            fabTop.setClickable(true);
+            fabFav.setClickable(true);
+            isFabOpen = true;
+        }
+    }
+
+    //TODO FIX SLOW PERFORMANCE ISSUE WITH LOADING FAVORITES IN GRID VIEW :(
     private void loadVideoList(URL movieListUrl, boolean favoriteSelection) {
         //reloads movie list as soon as the user selects a different search/sort option
         if (movieListUrl != null && !favoriteSelection) {
@@ -231,7 +236,12 @@ public class MovieGridActivity extends AppCompatActivity implements SharedPrefer
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        setupSharedPreferences();
+        //makes removal of a favorite item appear as soon as the user returns from the detail view
+        if(this.getTitle() == getResources().getText(R.string.movie_list_fav_title)) {
+            URL movieListUrl = null;
+            boolean favoriteSelection = true;
+            loadVideoList(movieListUrl, favoriteSelection);
+        }
     }
 
     //inner class to async load movie list (suppress to get lint error to go away, cannot make it static)
@@ -247,7 +257,7 @@ public class MovieGridActivity extends AppCompatActivity implements SharedPrefer
 //            Log.v(TAG, "loadMoviesUrl: "+ urls[0]);
             ArrayList<MovieParcelable> movieDbResults = null;
             try {
-                movieDbResults = LoadAndParseUtils.loadMoviesJsonFromUrl(Objects.requireNonNull(loadMoviesUrl));
+                movieDbResults = LoadAndParseUtils.loadMoviesJsonFromUrl(loadMoviesUrl);
             } catch (IOException e) {
                 e.printStackTrace();
             }

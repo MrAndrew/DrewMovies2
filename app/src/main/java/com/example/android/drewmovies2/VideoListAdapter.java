@@ -24,7 +24,7 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
     final private ListItemClickListener mOnClickListener;
 
     public interface ListItemClickListener {
-        void onListItemClick(View v, String videoKey);
+        void onListItemClick(Integer v, String videoKey);
     }
 
     public VideoListAdapter(ArrayList<VideoParcelable> inVideos, ListItemClickListener listener) {
@@ -70,29 +70,31 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
             videoTitle = v.findViewById(R.id.video_title);
         }
 
-        void bind(final int index) {
+        void bind(int index) {
+            Integer share = 2;
+            Integer play = 1;
             //set title and link values here
 //            videoView.setTag(videos.get(index).getVideoKey());
 //            videoView.setOnClickListener(this);
 
             shareBtn.setTag(videos.get(index).getVideoKey());
+            shareBtn.setId(share);
             shareBtn.setOnClickListener(this);
-
-            //TODO //CREATE SHARE INTENT TO SHARE YOUTUBE VIDEO LINK
-            //TODO //ADD THE LINK BUTTON IN video_link_item.xml and remove view listener so
-            //TODO //only play button opens youtube and share button opens Intent.createChooser()
 
             videoTitle.setText(videos.get(index).getVideoName());
 
             playBtn.setTag(videos.get(index).getVideoKey());
+            playBtn.setId(play);
             playBtn.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             String videoKey = (String) v.getTag();
+            // 1 for play 2 for share
+            Integer shareOrPlay = v.getId();
 //            Log.v(TAG, "view clicked: " + v);
-            mOnClickListener.onListItemClick(v, videoKey);
+            mOnClickListener.onListItemClick(shareOrPlay, videoKey);
         }
 
     }

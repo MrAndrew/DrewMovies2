@@ -31,7 +31,7 @@ public class BuildUrlUtils {
     final private static String PARAM_PAGE = "page";
     final private static String page_num = "1";
     //TODO API KEY, REMOVE BEFORE PUTTING ON GIT!
-    final private static String api_key = "<<API_KEY>>";
+    final private static String api_key = "72edd0418060deba2a08171d52d9a084";
     final private static String PARAM_API_KEY = "api_key";
     //video and reviews requests
     final private static String video_path = "videos";
