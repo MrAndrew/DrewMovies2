@@ -15,8 +15,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.drewmovies2.data.FavoriteMoviesContract;
@@ -25,6 +25,7 @@ import com.example.android.drewmovies2.utils.BuildUrlUtils;
 import com.example.android.drewmovies2.utils.LoadAndParseUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -32,27 +33,28 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieGridActivity extends AppCompatActivity implements
-//        SharedPreferences.OnSharedPreferenceChangeListener
-    View.OnClickListener {
+public class MovieGridActivity extends AppCompatActivity implements View.OnClickListener {
 
 //    final static private String TAG = MovieGridActivity.class.getSimpleName();
     @BindView(R.id.movie_posters_gv)
     GridView moviesGridView;
     @BindView(R.id.fab_prime)
     FloatingActionButton fabPrime;
-    @BindView(R.id.fab_pop)
-    FloatingActionButton fabPop;
-    @BindView(R.id.fab_top)
-    FloatingActionButton fabTop;
-    @BindView(R.id.fab_fav)
-    FloatingActionButton fabFav;
-    @BindView(R.id.fab_pop_tv)
-    TextView fabPopTv;
-    @BindView(R.id.fab_top_tv)
-    TextView fabTopTv;
-    @BindView(R.id.fab_fav_tv)
-    TextView fabFavTv;
+    @BindView(R.id.btn_top)
+    Button btnTop;
+    @BindView(R.id.btn_pop)
+    Button btnPop;
+    @BindView(R.id.btn_fav)
+    Button btnFav;
+//    @BindView(R.id.fab_pop_tv)
+//    TextView fabPopTv;
+//    @BindView(R.id.fab_top_tv)
+//    TextView fabTopTv;
+//    @BindView(R.id.fab_fav_tv)
+//    TextView fabFavTv;
+    private URL movieListUrl;
+    private boolean isFav;
+    private String title;
 
     private Boolean isFabOpen = false;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
@@ -71,9 +73,25 @@ public class MovieGridActivity extends AppCompatActivity implements
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
         //set click listeners
         fabPrime.setOnClickListener(this);
-        fabPop.setOnClickListener(this);
-        fabTop.setOnClickListener(this);
-        fabFav.setOnClickListener(this);
+        btnFav.setOnClickListener(this);
+        btnPop.setOnClickListener(this);
+        btnTop.setOnClickListener(this);
+
+        if (savedInstanceState == null) {
+            //loads popular movies on first start
+            title = getResources().getString(R.string.movie_list_pop_title);
+            setTitle(title);
+            movieListUrl = BuildUrlUtils.buildMovieListPopRequestUrl();
+            isFav = false;
+            if (isConnected()) {
+                loadVideoList(movieListUrl, isFav);
+            } else {
+                Toast.makeText(MovieGridActivity.this, "No Internet Connection Detected",
+                        Toast.LENGTH_SHORT).show();
+                moviesGridView.setAdapter(null);
+            }
+
+        }
     }
 
     //I found a tutorial and used in a previous practice project before starting this course and I
@@ -83,37 +101,40 @@ public class MovieGridActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        URL movieListUrl;
-        boolean favoriteSelection;
+//        URL movieListUrl;
+//        boolean favoriteSelection;
         switch (id){
             case R.id.fab_prime:
                 //closes or opens fab once user selects plus icon
                 animateFAB();
                 break;
-            case R.id.fab_pop:
+            case R.id.btn_pop:
                 // sets view to and loads popular movies
-                setTitle(getResources().getText(R.string.movie_list_pop_title));
+                title = getResources().getString(R.string.movie_list_pop_title);
+                setTitle(title);
                 movieListUrl = BuildUrlUtils.buildMovieListPopRequestUrl();
-                favoriteSelection = false;
-                loadVideoList(movieListUrl, favoriteSelection);
+                isFav = false;
+                loadVideoList(movieListUrl, isFav);
                 //closes fab once user selects an option
                 animateFAB();
                 break;
-            case R.id.fab_top:
+            case R.id.btn_top:
                 // sets view to and loads top rated movies
-                setTitle(getResources().getText(R.string.movie_list_top_title));
+                title = getResources().getString(R.string.movie_list_top_title);
+                setTitle(title);
                 movieListUrl = BuildUrlUtils.buildMovieListRatedRequestUrl();
-                favoriteSelection = false;
-                loadVideoList(movieListUrl, favoriteSelection);
+                isFav = false;
+                loadVideoList(movieListUrl, isFav);
                 //closes fab once user selects an option
                 animateFAB();
                 break;
-            case R.id.fab_fav:
+            case R.id.btn_fav:
                 // sets view to and loads user's favorite movies
-                setTitle(getResources().getText(R.string.movie_list_fav_title));
+                title = getResources().getString(R.string.movie_list_fav_title);
+                setTitle(title);
                 movieListUrl = null;
-                favoriteSelection = true;
-                loadVideoList(movieListUrl, favoriteSelection);
+                isFav = true;
+                loadVideoList(movieListUrl, isFav);
                 //closes fab once user selects an option
                 animateFAB();
                 break;
@@ -124,33 +145,32 @@ public class MovieGridActivity extends AppCompatActivity implements
     //animates opening/showing of fab button choices
         if(isFabOpen){
             fabPrime.startAnimation(rotate_backward);
-            fabPop.startAnimation(fab_close);
-            fabTop.startAnimation(fab_close);
-            fabFav.startAnimation(fab_close);
-            fabPopTv.startAnimation(fab_close);
-            fabTopTv.startAnimation(fab_close);
-            fabFavTv.startAnimation(fab_close);
-            fabPop.setClickable(false);
-            fabTop.setClickable(false);
-            fabFav.setClickable(false);
+            btnTop.startAnimation(fab_close);
+            btnPop.startAnimation(fab_close);
+            btnFav.startAnimation(fab_close);
+//            fabPopTv.startAnimation(fab_close);
+//            fabTopTv.startAnimation(fab_close);
+//            fabFavTv.startAnimation(fab_close);
+            btnTop.setClickable(false);
+            btnPop.setClickable(false);
+            btnFav.setClickable(false);
             isFabOpen = false;
 
         } else {
             fabPrime.startAnimation(rotate_forward);
-            fabPop.startAnimation(fab_open);
-            fabTop.startAnimation(fab_open);
-            fabFav.startAnimation(fab_open);
-            fabPopTv.startAnimation(fab_open);
-            fabTopTv.startAnimation(fab_open);
-            fabFavTv.startAnimation(fab_open);
-            fabPop.setClickable(true);
-            fabTop.setClickable(true);
-            fabFav.setClickable(true);
+            btnTop.startAnimation(fab_open);
+            btnPop.startAnimation(fab_open);
+            btnFav.startAnimation(fab_open);
+//            fabPopTv.startAnimation(fab_open);
+//            fabTopTv.startAnimation(fab_open);
+//            fabFavTv.startAnimation(fab_open);
+            btnTop.setClickable(true);
+            btnPop.setClickable(true);
+            btnFav.setClickable(true);
             isFabOpen = true;
         }
     }
 
-    //TODO FIX SLOW PERFORMANCE ISSUE WITH LOADING FAVORITES IN GRID VIEW :(
     private void loadVideoList(URL movieListUrl, boolean favoriteSelection) {
         //reloads movie list as soon as the user selects a different search/sort option
         if (movieListUrl != null && !favoriteSelection) {
@@ -234,6 +254,34 @@ public class MovieGridActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        //saves variables when rotation changes or activity is paused, etc.
+        title = savedInstanceState.getString("TITLE");
+        isFav = savedInstanceState.getBoolean("IS_FAV");
+        String movieListUrlString = savedInstanceState.getString("QUERY_URL");
+        try {
+            movieListUrl = new URL(movieListUrlString);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        setTitle(title);
+        loadVideoList(movieListUrl, isFav);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //restores saved instances between lifecyle events
+        outState.putBoolean("IS_FAV", isFav);
+        outState.putString("TITLE", title);
+        if (movieListUrl != null){
+            outState.putString("QUERY_URL", movieListUrl.toString());
+        }
+    }
+
+    @Override
     protected void onPostResume() {
         super.onPostResume();
         //makes removal of a favorite item appear as soon as the user returns from the detail view
@@ -244,6 +292,42 @@ public class MovieGridActivity extends AppCompatActivity implements
             loadVideoList(movieListUrl, favoriteSelection);
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+//    @Override
+//    public void onDetach() {
+//        super.onDetach();
+//    }
+//
+//    @Override
+//    public void onAttach(Activity activity) {
+//        super.onAttach(activity);
+//    }
+
 
     //inner class to async load movie list (suppress to get lint error to go away, cannot make it static)
     @SuppressLint("StaticFieldLeak")

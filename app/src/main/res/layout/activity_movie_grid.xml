@@ -2,6 +2,7 @@
 
 <android.support.constraint.ConstraintLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"    >
@@ -27,105 +28,59 @@
         android:layout_width="50dp"
         android:layout_height="92dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         android:src="@drawable/plus_circle"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayoutFabPop"
+    <Button
+        android:id="@+id/btn_pop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/sort_button"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="@string/pref_popular_label"
+        android:textColor="@color/colorWhite"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/btn_top"
+        app:layout_constraintEnd_toEndOf="@+id/btn_top"
+        app:srcCompat="@drawable/plus_circle" />
+
+    <Button
+        android:id="@+id/btn_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/sort_button"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="@string/pref_top_rated_label"
+        android:textColor="@color/colorWhite"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/btn_fav"
+        app:layout_constraintEnd_toEndOf="@+id/btn_fav"
+        app:srcCompat="@drawable/plus_circle" />
+
+    <Button
+        android:id="@+id/btn_fav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/sort_button"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="@string/pref_favorites_label"
+        android:textColor="@color/colorWhite"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/fab_prime"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/fab_pop_tv"
-            style="@style/FloatingActionButton_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="invisible"
-            android:text="@string/pref_popular_label" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_pop"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_marginBottom="16dp"
-            android:layout_marginRight="16dp"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/plus_circle" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayoutFabTop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayoutFabPop"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/fab_top_tv"
-            style="@style/FloatingActionButton_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="invisible"
-            android:text="@string/pref_top_rated_label" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_top"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="32dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:srcCompat="@drawable/plus_circle" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayoutFabFav"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayoutFabTop"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/fab_fav_tv"
-            style="@style/FloatingActionButton_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="invisible"
-            android:text="@string/pref_favorites_label" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_fav"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:srcCompat="@drawable/plus_circle" />
-    </LinearLayout>
+        app:layout_constraintEnd_toEndOf="@+id/fab_prime"
+        app:srcCompat="@drawable/plus_circle" />
 
 </android.support.constraint.ConstraintLayout>

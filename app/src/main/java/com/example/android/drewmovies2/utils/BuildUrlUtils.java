@@ -11,7 +11,7 @@ public class BuildUrlUtils {
 
     //base urls for different types of requests
     final private static String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-    final private static String MOVIE_LIST_POP_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
+    final private static String MOVIE_LIST_POP_BASE_URL = "https://api.themoviedb.org/3/movie/popular";
     final private static String MOVIE_LIST_RATE_BASE_URL = "https://api.themoviedb.org/3/movie/top_rated";
     final private static String MOVIE_VIDEOS_BASE_URL = "https://api.themoviedb.org/3/movie/";
     final private static String MOVIE_REVIEWS_BASE_URL = "https://api.themoviedb.org/3/movie/";
@@ -19,9 +19,6 @@ public class BuildUrlUtils {
     //TODO KEEP A LIST OF DIFFERENT SIZE VARIABLES TO ALLOW THE USER TO CUSTOMIZE MOVIE POSTER SIZE
     //current size seems to be the best size for now, might change to user preference value in phase 2
     final private static String PARAM_IMAGE_SIZE = "w500";
-    //sort order Strings
-    final private static String PARAM_SORT = "sort_by";
-    final private static String sortByPop = "popularity.desc";
     //lang and page num strings
     // ex: &language=en-US&page=1
     // might be better to change to selectable strings from value resource folder, especially for
@@ -96,12 +93,13 @@ public class BuildUrlUtils {
 
     /**
      * Builds the URL to request list of movies in JSON format for popularity
-     * ex: http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=<APIKEY>
+     * ex: https://api.themoviedb.org/3/movie/popular?api_key=<<api_key>>&language=en-US&page=1
      */
     public static URL buildMovieListPopRequestUrl() {
         Uri builtUri = Uri.parse(MOVIE_LIST_POP_BASE_URL).buildUpon()
-                .appendQueryParameter(PARAM_SORT, sortByPop)
                 .appendQueryParameter(PARAM_API_KEY, api_key)
+                .appendQueryParameter(PARAM_LANG, lang_en_us)
+                .appendQueryParameter(PARAM_PAGE, page_num)
                 .build();
 //        Log.d(TAG, "movie list url: " + builtUri.toString());
 
