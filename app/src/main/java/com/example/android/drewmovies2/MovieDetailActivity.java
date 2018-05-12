@@ -1,7 +1,6 @@
 package com.example.android.drewmovies2;
 
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +10,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,11 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
     RecyclerView mVideoListRv;
     @BindView(R.id.favorite_button)
     CheckBox mFavBtn;
+    @BindView(R.id.movie_detail_sv)
+    ScrollView svDetails;
+
+    private Parcelable videoRvState;
+    private ArrayList<VideoParcelable> mvideos;
 
 //    private final String TAG = MovieDetailActivity.class.getSimpleName();
 
@@ -139,11 +145,12 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
         });
 
         //only loads if device has internet connection to prevent errors and crashes
-        boolean isConnected = isConnected();
-        if(isConnected) {
-            new VideoQueryTask().execute(videosUrl);
+        if (savedInstanceState == null) {
+            boolean isConnected = isConnected();
+            if(isConnected) {
+                new VideoQueryTask().execute(videosUrl);
+            }
         }
-
     }
 
     private boolean isConnected() {
@@ -160,10 +167,10 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
             Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoKey));
             Intent webIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://www.youtube.com/watch?v=" + videoKey));
-            try {
-                this.startActivity(appIntent);
-            } catch (ActivityNotFoundException ex) {
-                this.startActivity(webIntent);
+            if (appIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(appIntent);
+            } else if (webIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(webIntent);
             }
         } else if(v == 2) {
 //            Toast.makeText(MovieDetailActivity.this, "Clicked Share button.",
@@ -174,11 +181,81 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
             Uri videoLink = Uri.parse("http://www.youtube.com/watch?v=" + videoKey);
             sendIntent.putExtra(Intent.EXTRA_TEXT, videoLink.toString());
             sendIntent.setType("text/plain");
-            startActivity(sendIntent);
+            if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(sendIntent);
+            }
         }
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        //saves variables when rotation changes or activity is paused, etc.
+        final int[] position = savedInstanceState.getIntArray("SV_POSITION");
+        if(position != null) {
+            svDetails.post(new Runnable() {
+                @Override
+                public void run() {
+                    svDetails.scrollTo(position[0], position[1]);
+                }
+            });
+        }
+        if(savedInstanceState != null){
+            //referenced this for solution: "https://stackoverflow.com/questions/36568168/how-to-save-scroll-position-of-recyclerview-in-android"
+            mvideos = savedInstanceState.getParcelableArrayList("VIDEO_LIST");
+            videoRvState = savedInstanceState.getParcelable("VIDEO_LIST_STATE");
+            VideoListAdapter mVideoAdapter = new VideoListAdapter(mvideos, MovieDetailActivity.this);
+            mVideoListRv.setAdapter(mVideoAdapter);
+            mVideoListRv.getLayoutManager().onRestoreInstanceState(videoRvState);
+        }
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //restores saved instances between lifecyle events
+        //referenced this for solution: "https://stackoverflow.com/questions/36568168/how-to-save-scroll-position-of-recyclerview-in-android"
+        outState.putParcelable("VIDEO_LIST_STATE", mVideoListRv.getLayoutManager().onSaveInstanceState());
+        outState.putParcelableArrayList("VIDEO_LIST", mvideos);
+        //saves sv, but not rv
+        outState.putIntArray("SV_POSITION", new int[]{svDetails.getScrollX(), svDetails.getScrollY()});
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (videoRvState != null) {
+            mVideoListRv.getLayoutManager().onRestoreInstanceState(videoRvState);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    //NOTE: Lint suggests removing view variable, but it's needed to keep app from crashing because using
+    //onClick attribute in XML for the button instead of onClickListener
     public void startReviewsActivity(View view) {
         Intent startReviewsIntent = new Intent(MovieDetailActivity.this, MovieReviewsActivity.class);
         MovieParcelable movie = getIntent().getParcelableExtra("movie_object");
@@ -210,6 +287,7 @@ public class MovieDetailActivity extends AppCompatActivity implements VideoListA
         @Override
         protected void onPostExecute(final ArrayList<VideoParcelable> videos) {
 //            Log.d(TAG, "ArrayList<Video>: " + videos);
+            mvideos = videos;
             VideoListAdapter mVideoAdapter = new VideoListAdapter(videos, MovieDetailActivity.this);
             mVideoListRv.setAdapter(mVideoAdapter);
         }

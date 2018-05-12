@@ -15,33 +15,45 @@ class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, VERSION);
     }
 
+    //Assumes each movie has an id and title, but allows nulls for other values that may be missing
+    private static final String DATABASE_CREATE_FAVORITES = "CREATE TABLE " +
+            FavoriteMoviesContract.FavoriteEntry.TABLE_NAME +
+            " (" +
+            FavoriteMoviesContract.FavoriteEntry._ID +
+            "INTEGER PRIMARY KEY, " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_MOVIE_ID +
+            " INTEGER NOT NULL, " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_TITLE +
+            " TEXT NOT NULL, " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_IMAGE_URL +
+            " TEXT, " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_PLOT +
+            " TEXT, " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_RELEASE_DATE +
+            " TEXT, " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_RATING +
+            " DOUBLE);";
+
+    //example upgrade string for production release apps
+    private static final String DATABASE_ALTER_FAVORITES_1 = "ALTER TABLE " +
+            FavoriteMoviesContract.FavoriteEntry.TABLE_NAME + " ADD COLUMN " +
+            FavoriteMoviesContract.FavoriteEntry.COLUMN_ORIGINAL_LANGUAGE + " string;";
+    //add second alter table string here in another variable
+
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //Assumes each movie has an id and title, but allows nulls for other values that may be missing
-        final String CREATE_TABLE = "CREATE TABLE " +
-                FavoriteMoviesContract.FavoriteEntry.TABLE_NAME +
-                " (" +
-                FavoriteMoviesContract.FavoriteEntry._ID +
-                "INTEGER PRIMARY KEY, " +
-                FavoriteMoviesContract.FavoriteEntry.COLUMN_MOVIE_ID +
-                " INTEGER NOT NULL, " +
-                FavoriteMoviesContract.FavoriteEntry.COLUMN_TITLE +
-                " TEXT NOT NULL, " +
-                FavoriteMoviesContract.FavoriteEntry.COLUMN_IMAGE_URL +
-                " TEXT, " +
-                FavoriteMoviesContract.FavoriteEntry.COLUMN_PLOT +
-                " TEXT, " +
-                FavoriteMoviesContract.FavoriteEntry.COLUMN_RELEASE_DATE +
-                " TEXT, " +
-                FavoriteMoviesContract.FavoriteEntry.COLUMN_RATING +
-                " DOUBLE);";
-
-        db.execSQL(CREATE_TABLE);
+        db.execSQL(DATABASE_CREATE_FAVORITES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + FavoriteMoviesContract.FavoriteEntry.TABLE_NAME);
-        onCreate(db);
+        //won't upgrade user data unless version number variable is changed, a nice way to start an update
+        //but only change VERSION variable as soon as everything is ready to be released
+        if (oldVersion < newVersion) {
+            db.execSQL(DATABASE_ALTER_FAVORITES_1);
+        }
+        //add another if (NOT ELSE!) for subsequent database updates with each string altering the
+        //table by either adding or removing columns for less error prone upgradeability (and allowing
+        //flexible feature adds without losing old user data)
     }
 }

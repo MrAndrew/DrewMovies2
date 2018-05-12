@@ -24,6 +24,9 @@ public class FavoriteMoviesContract {
         public static final String COLUMN_PLOT = "plot";
         public static final String COLUMN_RELEASE_DATE = "release_date";
         public static final String COLUMN_RATING = "user_rating";
+
+        //example for adding more detailed values
+        public static final String COLUMN_ORIGINAL_LANGUAGE = "original_language";
     }
 
 }

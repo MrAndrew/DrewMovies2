@@ -46,19 +46,14 @@ public class MovieGridActivity extends AppCompatActivity implements View.OnClick
     Button btnPop;
     @BindView(R.id.btn_fav)
     Button btnFav;
-//    @BindView(R.id.fab_pop_tv)
-//    TextView fabPopTv;
-//    @BindView(R.id.fab_top_tv)
-//    TextView fabTopTv;
-//    @BindView(R.id.fab_fav_tv)
-//    TextView fabFavTv;
+
     private URL movieListUrl;
     private boolean isFav;
     private String title;
+    private int gvIndex;
 
     private Boolean isFabOpen = false;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,9 +143,6 @@ public class MovieGridActivity extends AppCompatActivity implements View.OnClick
             btnTop.startAnimation(fab_close);
             btnPop.startAnimation(fab_close);
             btnFav.startAnimation(fab_close);
-//            fabPopTv.startAnimation(fab_close);
-//            fabTopTv.startAnimation(fab_close);
-//            fabFavTv.startAnimation(fab_close);
             btnTop.setClickable(false);
             btnPop.setClickable(false);
             btnFav.setClickable(false);
@@ -161,9 +153,6 @@ public class MovieGridActivity extends AppCompatActivity implements View.OnClick
             btnTop.startAnimation(fab_open);
             btnPop.startAnimation(fab_open);
             btnFav.startAnimation(fab_open);
-//            fabPopTv.startAnimation(fab_open);
-//            fabTopTv.startAnimation(fab_open);
-//            fabFavTv.startAnimation(fab_open);
             btnTop.setClickable(true);
             btnPop.setClickable(true);
             btnFav.setClickable(true);
@@ -265,7 +254,8 @@ public class MovieGridActivity extends AppCompatActivity implements View.OnClick
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
+        gvIndex = savedInstanceState.getInt("GRID_VIEW_POSITION");
+        moviesGridView.setSelection(gvIndex);
         setTitle(title);
         loadVideoList(movieListUrl, isFav);
     }
@@ -279,17 +269,24 @@ public class MovieGridActivity extends AppCompatActivity implements View.OnClick
         if (movieListUrl != null){
             outState.putString("QUERY_URL", movieListUrl.toString());
         }
+        //solution to keep grid view position on rotation found here:
+        // "https://stackoverflow.com/questions/8619794/maintain-scroll-position-of-gridview-through-screen-rotation"
+        gvIndex = moviesGridView.getFirstVisiblePosition();
+        outState.putInt("GRID_VIEW_POSITION", gvIndex);
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
         //makes removal of a favorite item appear as soon as the user returns from the detail view
-        //but costs the user some performance as loading movie objects from the db takes some time :(
+        //while also remembering the position of the view and setting it accordingly
         if(this.getTitle() == getResources().getText(R.string.movie_list_fav_title)) {
             URL movieListUrl = null;
             boolean favoriteSelection = true;
             loadVideoList(movieListUrl, favoriteSelection);
+            if(gvIndex != 0) {
+                moviesGridView.setSelection(gvIndex);
+            }
         }
     }
 
@@ -317,17 +314,6 @@ public class MovieGridActivity extends AppCompatActivity implements View.OnClick
     public void onStart() {
         super.onStart();
     }
-
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//    }
-//
-//    @Override
-//    public void onAttach(Activity activity) {
-//        super.onAttach(activity);
-//    }
-
 
     //inner class to async load movie list (suppress to get lint error to go away, cannot make it static)
     @SuppressLint("StaticFieldLeak")
