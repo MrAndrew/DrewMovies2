@@ -10,6 +10,8 @@ Note: Android Studio may ask you to update certain dependencies. This is not rec
 
 ### Built With
 
+Along with base Android Studio tools (gradle, Java, standard Google dependencies) this project also implements: 
+
 * [Picasso](https://github.com/square/picasso) - A powerful image downloading and caching library for Android
 * [ButterKnife](https://github.com/JakeWharton/butterknife) - Library for easy binding of Android Views using an anotation processor
 
